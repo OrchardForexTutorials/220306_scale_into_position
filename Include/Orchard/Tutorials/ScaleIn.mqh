@@ -63,16 +63,32 @@ bool IsPositionInMinimumProfit( string symbol, int magic, ENUM_ORDER_TYPE type, 
 #ifdef __MQL5__
 bool IsPositionInMinimumProfit( string symbol, int magic, ENUM_ORDER_TYPE type, double minProfit ) {
 
-   for ( int i = PositionsTotal() - 1; i >= 0; i-- ) {
+   // check for margin mode, rf. 
+   //    [1] [Account Properties - Margin Mode](https://www.mql5.com/en/docs/constants/environment_state/accountinformation#enum_account_margin_mode)
+   //    [2] [Determining netting or hedging mode with MQL5 ?](https://www.mql5.com/en/forum/334163)
+   switch((ENUM_ACCOUNT_MARGIN_MODE)AccountInfoInteger(ACCOUNT_MARGIN_MODE))
+     {
+      case ACCOUNT_MARGIN_MODE_RETAIL_NETTING:
+         for ( int i = PositionsTotal() - 1; i >= 0; i-- ) {
 
-      //	If any position cannot be selected it is possible that this
-      //		trade means no scaling, catch it next time
-      if ( !PositionInfo.SelectByIndex( i ) ) return ( false );
+            //	If any position cannot be selected it is possible that this
+            //		trade means no scaling, catch it next time
+            if ( !PositionInfo.SelectByIndex( i ) ) return ( false );
 
-      if ( PositionInfo.Symbol() == symbol && PositionInfo.Magic() == magic &&
-           PositionInfo.Type() == type ) {
-         if ( PositionInfo.Profit() < minProfit ) return ( false );
-      }
+            if ( PositionInfo.Symbol() == symbol &&
+                 PositionInfo.Magic() == magic &&
+                 PositionInfo.Type() == type ) {
+               if ( PositionInfo.Profit() < minProfit ) return ( false );
+            }
+         }
+         break;
+      case ACCOUNT_MARGIN_MODE_EXCHANGE:
+         // need ?????
+         break;
+      case ACCOUNT_MARGIN_MODE_RETAIL_HEDGING:
+         // need code similar to #ifdef __MQL4__ - block
+         break;
+     }
    }
 
    return ( true );
