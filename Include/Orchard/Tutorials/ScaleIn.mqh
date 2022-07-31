@@ -45,6 +45,7 @@ bool NewBar( string symbol = NULL, int timeframe = 0, bool initToNow = false ) {
 #ifdef __MQL4__
 bool IsPositionInMinimumProfit( string symbol, int magic, ENUM_ORDER_TYPE type, double minProfit ) {
 
+   bool result = false;
    for ( int i = OrdersTotal() - 1; i >= 0; i-- ) {
 
       //	If any trade cannot be selected it is possible that this
@@ -52,17 +53,23 @@ bool IsPositionInMinimumProfit( string symbol, int magic, ENUM_ORDER_TYPE type, 
       if ( !OrderSelect( i, SELECT_BY_POS, MODE_TRADES ) ) return ( false );
 
       if ( OrderSymbol() == symbol && OrderMagicNumber() == magic && OrderType() == type ) {
-         if ( OrderProfit() < minProfit ) return ( false );
+         if ( OrderProfit() < minProfit ) {
+            return ( false );
+         }
+         else {
+            result = true;
+         }
       }
    }
 
-   return ( true );
+   return ( result );
 }
 #endif
 
 #ifdef __MQL5__
 bool IsPositionInMinimumProfit( string symbol, int magic, ENUM_ORDER_TYPE type, double minProfit ) {
 
+   bool result = false;
    for ( int i = PositionsTotal() - 1; i >= 0; i-- ) {
 
       //	If any position cannot be selected it is possible that this
@@ -71,10 +78,15 @@ bool IsPositionInMinimumProfit( string symbol, int magic, ENUM_ORDER_TYPE type, 
 
       if ( PositionInfo.Symbol() == symbol && PositionInfo.Magic() == magic &&
            PositionInfo.Type() == type ) {
-         if ( PositionInfo.Profit() < minProfit ) return ( false );
+         if ( PositionInfo.Profit() < minProfit ) {
+            return ( false );
+         }
+         else {
+            result = true;
+         }
       }
    }
 
-   return ( true );
+   return ( result );
 }
 #endif
